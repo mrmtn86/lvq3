@@ -1,90 +1,203 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
+
+
+class ReferansVektorSeti:
+
+    def __init__(self, sayi):
+        self.tekrarEdenVektor = None
+        self.tekarEtmeSayisi = 0
+        self.sayi = sayi
+        self.vektorler = []
+
+    def vektorEkle(self, vektor):
+        self.vektorler.append(vektor)
+
+
+class ReferansVektor:
+
+    def __init__(self, sayi: int, vektor: [], set: ReferansVektorSeti):
+        self.tekarEtmeSayisi = 0
+        self.sayi = sayi
+        self.vektor = vektor
+        self.set = set
+        self.set.vektorEkle(self)
+
+    def tekrarSayisiGetir(self):
+        #  if self.set.tekrarEdenVektor == self:
+        return self.tekarEtmeSayisi
+
+    # return 0
+
+    def tekrarArttir(self):
+        self.tekarEtmeSayisi += 1
+    # def tekrarArttir(self):
+    #
+    #     if self.set.tekrarEdenVektor != self:
+    #         self.set.tekrarEdenVektor = self
+    #         self.set.tekarEtmeSayisi = 0
+    #
+    #     self.set.tekarEtmeSayisi += 1
 
 
 class LvqMtn:
-    def __init__(self, girisVektorUzunlugu, ciktiSayisi, ciktiBasinaAraElemanSayisi, ogrenmeKatsayisi):
-        self.girisVektorUzunlugu = girisVektorUzunlugu
+
+    def __init__(self, giris_vektor_uzunlugu, ciktiSayisi, ciktiBasinaAraElemanSayisi, ogrenmeKatsayisi, cezaKatsayisi):
+        self.cezaKatsayisi = cezaKatsayisi
+        self.setler = []
+        self.tekrarSayisi = 1
+        self.referansVektorler = []
+        self.girisVektorUzunlugu = giris_vektor_uzunlugu
         self.ciktiSayisi = ciktiSayisi
         self.ciktiBasinaAraElemanSayisi = ciktiBasinaAraElemanSayisi
         self.ogrenmeKatsayisi = ogrenmeKatsayisi
         self.agiOlustur()
 
     def agiOlustur(self):
-        self.araElemanlar = []
+
         for i in range(self.ciktiSayisi):
+
+            set = ReferansVektorSeti(i)
+            self.setler.append(set)
+
             for j in range(self.ciktiBasinaAraElemanSayisi):
-                araEleman = i, np.random.rand(self.girisVektorUzunlugu)
-                self.araElemanlar.append(araEleman)
+                ara_eleman = ReferansVektor(i, np.random.rand(self.girisVektorUzunlugu), set)
+                self.referansVektorler.append(ara_eleman)
 
     def egit(self, girdiler, etiketler):
 
         for i in range(len(girdiler)):
+            self.tekrarSayisi += 1
             girdiItr = girdiler[i]
-            araEleman = self.enYakinAraElemaniGetir(girdiItr)
-            if araEleman[0] == etiketler[i]:
-                self.yakinlastir(araEleman, girdiItr)
-            else:
-                dogruAraEleman = self.enYakinAraElemaniGetir(girdiItr, etiketler[i])
-                self.yakinlastir(dogruAraEleman, girdiItr)
-                self.uzaklastir(araEleman, girdiItr)
+            etiketItr = etiketler[i]
 
-            if i % 100 == 0:
+            enYakinEleman = self.enYakinAraElemaniGetir(girdiItr)
+
+            if enYakinEleman.sayi != etiketItr:
+                self.uzaklastir(enYakinEleman, girdiItr)
+
+            enUygunEleman = self.settekiEnUygunuGetir(girdiItr, etiketItr)
+            enUygunEleman.tekrarArttir()
+            self.yakinlastir(enUygunEleman, girdiItr)
+
+            if i % 2000 == 0:
                 print(i)
 
                 self.araElemanlariGorsellestir(i)
 
-    def enYakinAraElemaniGetir(self, girdi, etiket=None):
-        enyakinEleman = ""
-        enYakindakiElemaninUzkligi = float('inf')
+    def settekiEnUygunuGetir(self, girdi, etiket):
 
-        for i in range(len(self.araElemanlar)):
+        vektorler = self.setinVektorleriniGetir(etiket)
 
-            araElemanItr = self.araElemanlar[i]
-            uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr[1], girdi)
+        enyakinEleman = vektorler[0]
+
+        enYakindakiElemaninUzkligi = self.agirlikliUzaklikHesapla(enyakinEleman, girdi)
+        # enYakindakiElemaninUzkligi += enYakindakiElemaninUzkligi * enyakinEleman.tekrarSayisiGetir() * self.cezaKatsayisi
+
+        for i in range(len(vektorler)):
+            araElemanItr = vektorler[i]
+
+            uzaklikHesaplanan = self.agirlikliUzaklikHesapla(araElemanItr, girdi)
 
             dahaYakin = uzaklikHesaplanan < enYakindakiElemaninUzkligi
-            etiketUygun = etiket is None or etiket == araElemanItr[0]
 
-            if dahaYakin and etiketUygun:
+            if not dahaYakin:
+                continue
+
+            enyakinEleman = araElemanItr
+            enYakindakiElemaninUzkligi = uzaklikHesaplanan
+
+        return enyakinEleman
+
+    def setinVektorleriniGetir(self, etiket):
+        for i in range(len(self.setler)):
+            setItr = self.setler[i]
+            if setItr.sayi == etiket:
+                return setItr.vektorler
+
+    def enUygunAraElemaniGetir(self, girdi, etiket, etiketZorla):
+        enyakinEleman = self.referansVektorler[0]
+        enYakindakiElemaninUzkligi = self.uzaklikHesapla(self.referansVektorler[0].vektor, girdi)
+
+        for i in range(len(self.referansVektorler)):
+
+            araElemanItr = self.referansVektorler[i]
+
+            ayniEtiket = etiket == araElemanItr.sayi
+
+            uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr.vektor, girdi)
+
+            if ayniEtiket:
+                uzaklikHesaplanan += uzaklikHesaplanan * araElemanItr.tekrarSayisiGetir() * self.cezaKatsayisi
+
+            dahaYakin = uzaklikHesaplanan < enYakindakiElemaninUzkligi
+
+            if not dahaYakin:
+                continue
+
+            etiketUygun = not etiketZorla or (ayniEtiket and etiketZorla)
+
+            if etiketUygun:
                 enyakinEleman = araElemanItr
                 enYakindakiElemaninUzkligi = uzaklikHesaplanan
 
         return enyakinEleman
 
+    def enYakinAraElemaniGetir(self, girdi):
+        enyakinEleman = ""
+        enYakindakiElemaninUzkligi = float('inf')
+
+        for i in range(len(self.referansVektorler)):
+
+            araElemanItr = self.referansVektorler[i]
+            uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr.vektor, girdi)
+
+            dahaYakin = uzaklikHesaplanan < enYakindakiElemaninUzkligi
+
+            if dahaYakin:
+                enyakinEleman = araElemanItr
+                enYakindakiElemaninUzkligi = uzaklikHesaplanan
+
+        return enyakinEleman
+
+    def agirlikliUzaklikHesapla(self, referansVektor, vektor2):
+        uzaklikHesaplanan = np.sqrt(np.sum((referansVektor.vektor - vektor2) ** 2))
+        uzaklikHesaplanan += uzaklikHesaplanan * referansVektor.tekrarSayisiGetir() * self.cezaKatsayisi / self.tekrarSayisi
+        return uzaklikHesaplanan
+
     def uzaklikHesapla(self, vektor1, vektor2):
         return np.sqrt(np.sum((vektor1 - vektor2) ** 2))
 
     def yakinlastir(self, oynakV, sabitV):
+        v = oynakV.vektor
         for i in range(len(sabitV)):
-            oynakV[1][i] = oynakV[1][i] + self.ogrenmeKatsayisi * (sabitV[i] - oynakV[1][i])
+            v[i] = v[i] + self.ogrenmeKatsayisi * (sabitV[i] - v[i])
 
     def uzaklastir(self, oynakV, sabitV):
+        v = oynakV.vektor
         for i in range(len(sabitV)):
-            oynakV[1][i] = oynakV[1][i] - self.ogrenmeKatsayisi * (sabitV[i] - oynakV[1][i])
+            v[i] = v[i] - self.ogrenmeKatsayisi * (sabitV[i] - v[i])
 
     def test(self, test_imgs, test_labels):
         basari = 0
         for i in range(len(test_imgs)):
             enYakinAraElaman = self.enYakinAraElemaniGetir(test_imgs[i])
-            if (enYakinAraElaman[0] == test_labels[i]):
+            if enYakinAraElaman.sayi == test_labels[i]:
                 basari = basari + 1
         return basari / len(test_imgs) * 100
 
     def tahminEt(self, tahminSayi):
         enyakinEleman = self.enYakinAraElemaniGetir(tahminSayi[1])
-        uzaklik = self.uzaklikHesapla(tahminSayi[1], enyakinEleman[1])
-        return enyakinEleman[0], uzaklik
+        uzaklik = self.uzaklikHesapla(tahminSayi[1], enyakinEleman.vektor)
+        return enyakinEleman.sayi, uzaklik
 
     def araElemanlariGorsellestir(self, i):
 
-
-        for i in range(len(self.araElemanlar)):
-            plt.subplot(3, 4, i + 1)  # the number of images in the grid is 5*5 (25)
-            plt.imshow(self.araElemanlar[i][1].reshape((28, 28)), cmap="Greys")
+        plt.rcParams["figure.figsize"] = (self.ciktiBasinaAraElemanSayisi,self.ciktiSayisi)
+        for i in range(len(self.referansVektorler)):
+            plt.subplot( self.ciktiSayisi,self.ciktiBasinaAraElemanSayisi, i + 1)  # the number of images in the grid is 5*5 (25)
+            plt.imshow(self.referansVektorler[i].vektor.reshape((28, 28)), cmap="Greys")
 
 
         plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[]);
         plt.show()
-

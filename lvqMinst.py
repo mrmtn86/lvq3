@@ -19,7 +19,8 @@ image_pixels = image_size * image_size
 # In[3]
 import LvqMtn
 
-ysa = LvqMtn.LvqMtn(len(train_imgs[0]), 10, 1, 0.01)
+
+ysa = LvqMtn.LvqMtn(len(train_imgs[0]), 10, 30, 0.01, 1500)
 
 # In[4]
 import matplotlib.pyplot as plt
