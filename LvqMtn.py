@@ -115,33 +115,33 @@ class LvqMtn:
             if setItr.sayi == etiket:
                 return setItr.vektorler
 
-    def enUygunAraElemaniGetir(self, girdi, etiket, etiketZorla):
-        enyakinEleman = self.referansVektorler[0]
-        enYakindakiElemaninUzkligi = self.uzaklikHesapla(self.referansVektorler[0].vektor, girdi)
-
-        for i in range(len(self.referansVektorler)):
-
-            araElemanItr = self.referansVektorler[i]
-
-            ayniEtiket = etiket == araElemanItr.sayi
-
-            uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr.vektor, girdi)
-
-            if ayniEtiket:
-                uzaklikHesaplanan += uzaklikHesaplanan * araElemanItr.tekrarSayisiGetir() * self.cezaKatsayisi
-
-            dahaYakin = uzaklikHesaplanan < enYakindakiElemaninUzkligi
-
-            if not dahaYakin:
-                continue
-
-            etiketUygun = not etiketZorla or (ayniEtiket and etiketZorla)
-
-            if etiketUygun:
-                enyakinEleman = araElemanItr
-                enYakindakiElemaninUzkligi = uzaklikHesaplanan
-
-        return enyakinEleman
+    # def enUygunAraElemaniGetir(self, girdi, etiket, etiketZorla):
+    #     enyakinEleman = self.referansVektorler[0]
+    #     enYakindakiElemaninUzkligi = self.uzaklikHesapla(self.referansVektorler[0].vektor, girdi)
+    #
+    #     for i in range(len(self.referansVektorler)):
+    #
+    #         araElemanItr = self.referansVektorler[i]
+    #
+    #         ayniEtiket = etiket == araElemanItr.sayi
+    #
+    #         uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr.vektor, girdi)
+    #
+    #         if ayniEtiket:
+    #             uzaklikHesaplanan += uzaklikHesaplanan * araElemanItr.tekrarSayisiGetir() * self.cezaKatsayisi
+    #
+    #         dahaYakin = uzaklikHesaplanan < enYakindakiElemaninUzkligi
+    #
+    #         if not dahaYakin:
+    #             continue
+    #
+    #         etiketUygun = not etiketZorla or (ayniEtiket and etiketZorla)
+    #
+    #         if etiketUygun:
+    #             enyakinEleman = araElemanItr
+    #             enYakindakiElemaninUzkligi = uzaklikHesaplanan
+    #
+    #     return enyakinEleman
 
     def enYakinAraElemaniGetir(self, girdi):
         enyakinEleman = ""
@@ -160,9 +160,25 @@ class LvqMtn:
 
         return enyakinEleman
 
+    def tumReferanslaraolanUzakliklariHesapla(self, girdi):
+
+        referanslaraUzakliklar = []
+
+        for i in range(len(self.referansVektorler)):
+            araElemanItr = self.referansVektorler[i]
+            uzaklikHesaplanan = self.uzaklikHesapla(araElemanItr.vektor, girdi)
+            refUzakligi = uzaklikHesaplanan, araElemanItr
+            referanslaraUzakliklar.append(refUzakligi)
+
+        referanslaraUzakliklar.sort(key=lambda x: x[0])
+        return referanslaraUzakliklar
+
     def agirlikliUzaklikHesapla(self, referansVektor, vektor2):
         uzaklikHesaplanan = np.sqrt(np.sum((referansVektor.vektor - vektor2) ** 2))
-        uzaklikHesaplanan += uzaklikHesaplanan * referansVektor.tekrarSayisiGetir() * self.cezaKatsayisi / self.tekrarSayisi
+        tekrar = referansVektor.tekrarSayisiGetir()
+        if tekrar > 0:
+            ceza = np.sqrt(uzaklikHesaplanan * tekrar) * self.cezaKatsayisi / self.tekrarSayisi
+            uzaklikHesaplanan += ceza
         return uzaklikHesaplanan
 
     def uzaklikHesapla(self, vektor1, vektor2):
@@ -189,15 +205,15 @@ class LvqMtn:
     def tahminEt(self, tahminSayi):
         enyakinEleman = self.enYakinAraElemaniGetir(tahminSayi[1])
         uzaklik = self.uzaklikHesapla(tahminSayi[1], enyakinEleman.vektor)
-        return enyakinEleman.sayi, uzaklik
+        return enyakinEleman, uzaklik
 
     def araElemanlariGorsellestir(self, i):
 
-        plt.rcParams["figure.figsize"] = (self.ciktiBasinaAraElemanSayisi,self.ciktiSayisi)
+        plt.rcParams["figure.figsize"] = (self.ciktiBasinaAraElemanSayisi, self.ciktiSayisi)
         for i in range(len(self.referansVektorler)):
-            plt.subplot( self.ciktiSayisi,self.ciktiBasinaAraElemanSayisi, i + 1)  # the number of images in the grid is 5*5 (25)
+            plt.subplot(self.ciktiSayisi, self.ciktiBasinaAraElemanSayisi,
+                        i + 1)  # the number of images in the grid is 5*5 (25)
             plt.imshow(self.referansVektorler[i].vektor.reshape((28, 28)), cmap="Greys")
-
 
         plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[]);
         plt.show()
