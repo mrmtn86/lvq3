@@ -18,7 +18,7 @@ image_pixels = image_size * image_size
 # In[3]
 import LvqMtn
 
-ysa = LvqMtn.LvqMtn(len(train_imgs[0]), 10, 10, 0.01, 4000)
+ysa = LvqMtn.LvqMtn(len(train_imgs[0]), 10, 30, 0.01, 1500)
 
 # In[4]
 import matplotlib.pyplot as plt
@@ -37,12 +37,11 @@ tahminSonuc = ysa.tumReferanslaraolanUzakliklariHesapla(tahminSayi[1])
 
 print("", tahminSayi[0], "->", tahminSonuc)
 
-plt.rcParams["figure.figsize"] = (13, 10)
+plt.rcParams["figure.figsize"] = (15, 10)
 for i in range(len(tahminSonuc)):
-    ax=plt.subplot(13, 5, i + 1)  # the number of images in the grid is 5*5 (25)
+    ax = plt.subplot(13, 5, i + 1)  # the number of images in the grid is 5*5 (25)
     ax.set_xlabel(tahminSonuc[i][0])
     plt.imshow(tahminSonuc[i][1].vektor.reshape((28, 28)), cmap="Greys")
-
 
 ax = plt.subplot(13, 5, 58)  # the number of images in the grid is 5*5 (25)
 

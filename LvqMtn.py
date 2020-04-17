@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import MAtrixOpp
 
 
 class ReferansVektorSeti:
@@ -51,9 +52,11 @@ class LvqMtn:
         self.ciktiSayisi = ciktiSayisi
         self.ciktiBasinaAraElemanSayisi = ciktiBasinaAraElemanSayisi
         self.ogrenmeKatsayisi = ogrenmeKatsayisi
-        self.agiOlustur()
+        self.agiOlustur2()
 
-    def agiOlustur(self):
+    def agiOlustur2(self):
+
+        uzakVektors = MAtrixOpp.uzakVektorleriOlustur(self.ciktiBasinaAraElemanSayisi)
 
         for i in range(self.ciktiSayisi):
 
@@ -61,8 +64,20 @@ class LvqMtn:
             self.setler.append(set)
 
             for j in range(self.ciktiBasinaAraElemanSayisi):
-                ara_eleman = ReferansVektor(i, np.random.rand(self.girisVektorUzunlugu), set)
+                ara_eleman = ReferansVektor(i, uzakVektors[i, j], set)
                 self.referansVektorler.append(ara_eleman)
+
+
+    # def agiOlustur(self):
+    #
+    #     for i in range(self.ciktiSayisi):
+    #
+    #         set = ReferansVektorSeti(i)
+    #         self.setler.append(set)
+    #
+    #         for j in range(self.ciktiBasinaAraElemanSayisi):
+    #             ara_eleman = ReferansVektor(i, np.random.rand(self.girisVektorUzunlugu), set)
+    #             self.referansVektorler.append(ara_eleman)
 
     def egit(self, girdiler, etiketler):
 
@@ -160,8 +175,8 @@ class LvqMtn:
 
         return enyakinEleman
 
-    def tumReferanslaraolanUzakliklariHesapla(self, girdi):
 
+    def tumReferanslaraolanUzakliklariHesapla(self, girdi):
         referanslaraUzakliklar = []
 
         for i in range(len(self.referansVektorler)):
@@ -213,7 +228,9 @@ class LvqMtn:
         for i in range(len(self.referansVektorler)):
             plt.subplot(self.ciktiSayisi, self.ciktiBasinaAraElemanSayisi,
                         i + 1)  # the number of images in the grid is 5*5 (25)
-            plt.imshow(self.referansVektorler[i].vektor.reshape((28, 28)), cmap="Greys")
+            referanVektor = self.referansVektorler[i]
+            plt.imshow(referanVektor.vektor.reshape((28, 28)), cmap="Greys")
+            plt.xlabel(referanVektor.tekarEtmeSayisi)
 
         plt.setp(plt.gcf().get_axes(), xticks=[], yticks=[]);
         plt.show()
